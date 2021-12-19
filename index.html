@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="chat.css">
+</head>
+<body>
+    <div class="panel-default">
+        <div class="panel-heading">
+            <p>チャットアプリ</p>
+        </div>
+        <div id="scroller" class="panel-body">
+            <ul id='messages'>
+            </ul>
+        </div>
+        <div class="panel-footer">
+            <input type='text' class="form-control" id="name" placeholder="ユーザー名">
+        </div>
+        <div class="panel-footer">
+            <input type='text' class="form-control" id="message" placeholder="メッセージ">
+        </div>
+    </div>
+
+    <!-- JQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+    <!-- JQuery -->
+
+    <!--** 以下Firebase **-->
+
+    <script type="module">
+        // Import the functions you need from the SDKs you need
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.0/firebase-app.js";
+        // TODO: Add SDKs for Firebase products that you want to use
+        // https://firebase.google.com/docs/web/setup#available-libraries
+        import { getDatabase, ref, push, set, onChildAdded, remove, onChildRemoved }
+            from "https://cdnjs.cloudflare.com/ajax/libs/firebase/9.6.0/firebase-database.min.js";
+    
+    
+        // Your web app's Firebase configuration
+        const firebaseConfig = {
+          apiKey: "AIzaSyD8NG_zoTONRJ5A4cxfoMQSvu5VjWZXH-Q",
+          authDomain: "gsapp-262dc.firebaseapp.com",
+          projectId: "gsapp-262dc",
+          storageBucket: "gsapp-262dc.appspot.com",
+          messagingSenderId: "545385689822",
+          appId: "1:545385689822:web:67628abddf9ed8cb26884f"
+        };
+      
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+    
+        const db = getDatabase(app); //RealtimeDBに接続
+        const dbRef = ref(db, "chat");  //"chat"を利用    
+        
+
+        var myFirebaseRef = new Firebase("https://gsapp-262dc-default-rtdb.firebaseio.com/");
+        
+        myFirebaseRef.child('messages').push({
+         'message': 'こんにちは'
+        });
+
+        myFirebaseRef.on('child_added', function(dataSnapshot) {
+        //データベースに変更があった場合のコールバック処理
+        });
+    
+
+        // ENTERキーを押した時に発動する
+        messageField.keypress(function (e) {
+        if (e.keyCode == 13) {
+        //フォームに入力された情報
+        var username = nameField.val();
+        var message = messageField.val();
+
+        const newPostRef = push(dbRef);
+        set(newPostRef, msg);
+
+        //データベースに保存する
+        messagesRef.push({name:username, text:message});
+        messageField.val('');
+
+        $('#scroller').scrollTop($('#messages').height());
+    }
+});
+
+        // データベースにデータが追加されたときに発動する
+        messagesRef.limitToLast(10).on('child_added', function (snapshot) {
+        //取得したデータ
+        var data = snapshot.val();
+        var username = data.name || "anonymous";
+        var message = data.text;
+
+        //取得したデータの名前が自分の名前なら右側に吹き出しを出す
+        if ( username == nameField.val() ) {
+
+        var messageElement = $("<il><p class='sender_name me'>" + username + "</p><p class='right_balloon'>" + message + "</p><p class='clear_balloon'></p></il>");
+
+        } else {
+
+        var messageElement = $("<il><p class='sender_name'>" + username + "</p><p class='left_balloon'>" + message + "</p><p class='clear_balloon'></p></il>");
+
+        }
+
+        //HTMLに取得したデータを追加する
+        messageList.append(messageElement)
+
+        //一番下にスクロールする
+        messageList[0].scrollTop = messageList[0].scrollHeight;
+        });
+
+
+   </script>
+
+</body>
+    <script src="chat.js"></script>
+</html>
